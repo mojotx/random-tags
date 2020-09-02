@@ -12,6 +12,7 @@
 #include "colors.h"
 
 bool debug = false;
+bool randomize = false;
 
 // Takes one argument, a count of random semantic versions to return
 
@@ -25,17 +26,20 @@ int main( int argc, char *argv[] )
 
     opterr=0;
     int c;
-    while ((c = getopt( argc, argv, "hd")) != -1) {
+    while ((c = getopt( argc, argv, "hdr")) != -1) {
         switch(c) {
             case 'd':
                 debug = true;
-                fputs( BRIGHT BLACK "DEBUG: On\n" NORMAL, stderr );
                 break;
 
             case 'h':
                 fputs( BRIGHT BLACK "You asked for help\n" NORMAL, stderr );
                 usage(argv[0]);
                 return EXIT_FAILURE;
+
+            case 'r':
+                randomize = true;
+                break;
 
             case '?':
             default:
@@ -49,6 +53,12 @@ int main( int argc, char *argv[] )
         }
     }
 
+    if (debug) {
+        fputs( BRIGHT BLACK "DEBUG: On\n" NORMAL, stderr );
+        if ( randomize )
+            fputs( BRIGHT BLACK "Randomize: On\n" NORMAL, stderr );
+    }
+
     unsigned long   qty;
     if (optind < argc)
        qty  = parse_qty( argv[optind] );
@@ -58,7 +68,7 @@ int main( int argc, char *argv[] )
     }
 
     if (debug)
-        printf( "You want %lu random versions.\n", qty );
+        fprintf( stderr, BRIGHT BLACK "You want %lu random versions.\n" NORMAL, qty );
 
     // Start with v0.0.1
     version_t       v = { 0, 0, 1, "" };
@@ -72,63 +82,64 @@ int main( int argc, char *argv[] )
     for (unsigned long i=0; i<qty; ++i) {
 
         if (debug) {
-            printf( "%lu: ", i+1 );
-            print_ver( v );
+            fprintf( stderr, BRIGHT BLACK "%lu: %s\n" NORMAL, i+1, get_ver(v) );
         }
 
         data[i] = v;
 
-        if ( bump() ) {
-            if (debug)
-                printf ("BuMp!" );
-
-            if ( yesorno() ) {
-                if (debug)
-                    printf ("(major) %s to ", get_ver(v) );
+        bump_t b = getBump();
+        switch (b) {
+            case MAJOR:
+                if (debug) {
+                    fprintf( stderr, BRIGHT BLACK "BUMP (major) %s to " NORMAL, get_ver(v) );
+                }
                 v.major++;
                 v.minor=0;
                 v.patch=0;
                 if (debug)
-                    printf( " %s\n", get_ver(v) );
-            }
-            else {
+                    fprintf( stderr, BRIGHT BLACK " %s\n" NORMAL, get_ver(v) );
+                break;
+
+            case MINOR:
                 if (debug)
-                    printf( "(minor) %s to ", get_ver(v) );
+                    fprintf( stderr, BRIGHT BLACK  " BUMP (minor) %s to " NORMAL, get_ver(v) );
                 v.minor++;
                 v.patch=0;
                 if (debug)
-                    printf( " %s\n", get_ver(v));
-            }
-        }
-        else {
-            v.patch++;
+                    fprintf( stderr, BRIGHT BLACK " %s\n" NORMAL, get_ver(v));
+                break;
+            case PATCH:
+                v.patch++;
+                break;
+            default:
+                fprintf( stderr, RED "UNKNOWN bump value %d!\n" NORMAL, (int)(b) );
+                break;
         }
 
     }
 
-    if (debug)
-        printf( "\e[36m" );
-    // Now print them in random order
-    unsigned long rem=qty;
-    while ( rem > 0 ) {
-        unsigned long i = arc4random_uniform( rem + 1 );
-        if(debug)
-            printf( "%lu: ", rem );
-        print_ver( data[i] );
+    if ( randomize ) {
+        unsigned long rem=qty;
+        while ( rem > 0 ) {
+            unsigned long i = arc4random_uniform( rem + 1 );
+            if(debug)
+                fprintf( stderr, BRIGHT BLACK "%lu: " NORMAL, rem );
+            print_ver( data[i] );
 
-        // Shift
-        for ( ; i<rem; ++i ) {
-            if ( i+1 < rem ) {
-                data[i]=data[i+1];
-                assert( valid_ver( data[i] ) );
+            // Shift
+            for ( ; i<rem; ++i ) {
+                if ( i+1 < rem ) {
+                    data[i]=data[i+1];
+                    assert( valid_ver( data[i] ) );
+                }
             }
+
+            rem--;
         }
-
-        rem--;
     }
-    if (debug)
-        printf( "\e[0m" );
-
+    else
+        for (unsigned long i=0; i<qty; i++)
+            print_ver( data[i] );
 
     return EXIT_SUCCESS;
 }

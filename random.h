@@ -3,8 +3,11 @@
 
 #include <stdbool.h>
 
+typedef enum bump { MAJOR, MINOR, PATCH } bump_t;
 
-bool bump( void );
+bump_t getBump(void);
+
+bool bump( uint32_t qty );
 
 bool yesorno( void );
 
