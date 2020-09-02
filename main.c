@@ -119,27 +119,40 @@ int main( int argc, char *argv[] )
     }
 
     if ( randomize ) {
-        unsigned long rem=qty;
-        while ( rem > 0 ) {
-            unsigned long i = arc4random_uniform( rem + 1 );
-            if(debug)
-                fprintf( stderr, BRIGHT BLACK "%lu: " NORMAL, rem );
-            print_ver( data[i] );
 
-            // Shift
-            for ( ; i<rem; ++i ) {
-                if ( i+1 < rem ) {
-                    data[i]=data[i+1];
-                    assert( valid_ver( data[i] ) );
-                }
+        version_t *data_copy;
+        if ((data_copy = calloc( qty, sizeof(version_t))) == NULL ) {
+            fprintf( stderr, "Cannot allocate enough memory for %lu versions!\n", qty );
+            return EXIT_FAILURE;
+        }
+
+        unsigned long rem=qty;
+        unsigned long ci = 0;
+
+        while ( rem > 0 ) {
+            unsigned long i = arc4random_uniform( qty + 1 );
+
+            if ( valid_ver( data[i] ) ) {
+                if (debug)
+                    fprintf( stderr, BRIGHT BLACK "Copying from data[%lu] to data_copy[%lu]: %s\n" NORMAL, i, ci, get_ver( data[i] ) );
+
+                data_copy[ci] = data[i];
+                memset( &data[i], 0, sizeof( data[i] ));
+                rem--;
+                ci++;
+            }
+            else if (debug) {
+                fprintf( stderr, "Skipping data[%lu] (ci=%lu)\n", i, ci );
             }
 
-            rem--;
         }
+
+        free(data);
+        data = data_copy;
     }
-    else
-        for (unsigned long i=0; i<qty; i++)
-            print_ver( data[i] );
+
+    for (unsigned long i=0; i<qty; i++)
+        print_ver( data[i] );
 
     return EXIT_SUCCESS;
 }
