@@ -27,3 +27,9 @@ get_ver( version_t t )
 
     return version;
 }
+
+bool
+valid_ver( version_t t )
+{
+    return ( t.major > 0 || t.minor > 0 || t.patch > 0 );
+}

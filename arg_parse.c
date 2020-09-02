@@ -7,7 +7,13 @@
 void
 usage( const char *s )
 {
-    fprintf( stderr, "Usage:  %s <number of versions>\n", s );
+    fprintf( stderr, "Usage: %s [ -d ] <number of versions>\n", s );
+    fputc( '\n', stderr );
+    fputs( "Arguments:\n", stderr );
+    fputc( '\n', stderr );
+    fputs( "        -d        Turn on debugging\n", stderr );
+    fputc( '\n', stderr );
+
 }
 
 unsigned long

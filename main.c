@@ -2,34 +2,66 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <assert.h>
 #include <stdbool.h>
+#include <getopt.h>
+#include <ctype.h>
 #include "version_struct.h"
 #include "random.h"
 #include "arg_parse.h"
+#include "colors.h"
 
-#define MAX_QTY (1024UL)
-
-const bool debug = false;
+bool debug = false;
 
 // Takes one argument, a count of random semantic versions to return
 
 int main( int argc, char *argv[] )
 {
 
-    if ( argc != 2 ) {
+    if ( argc < 2 ) {
         usage(argv[0]);
         return EXIT_FAILURE;
     }
 
+    opterr=0;
+    int c;
+    while ((c = getopt( argc, argv, "hd")) != -1) {
+        switch(c) {
+            case 'd':
+                debug = true;
+                fputs( BRIGHT BLACK "DEBUG: On\n" NORMAL, stderr );
+                break;
 
-    unsigned long   qty = parse_qty( argv[1] );
+            case 'h':
+                fputs( BRIGHT BLACK "You asked for help\n" NORMAL, stderr );
+                usage(argv[0]);
+                return EXIT_FAILURE;
+
+            case '?':
+            default:
+                if (isprint(optopt))
+                    fprintf( stderr, RED "Error: Unknown option '-%c'\n" NORMAL, optopt );
+                else
+                    fprintf( stderr, RED "Error: Unknown option '\\x%x'\n" NORMAL, optopt );
+                return EXIT_FAILURE;
+                break;
+
+        }
+    }
+
+    unsigned long   qty;
+    if (optind < argc)
+       qty  = parse_qty( argv[optind] );
+    else {
+        usage( argv[0] );
+        return EXIT_FAILURE;
+    }
 
     if (debug)
         printf( "You want %lu random versions.\n", qty );
 
     // Start with v0.0.1
     version_t       v = { 0, 0, 1, "" };
-
 
     version_t       *data;
     if ((data = calloc( qty, sizeof(version_t))) == NULL ) {
@@ -88,6 +120,7 @@ int main( int argc, char *argv[] )
         for ( ; i<rem; ++i ) {
             if ( i+1 < rem ) {
                 data[i]=data[i+1];
+                assert( valid_ver( data[i] ) );
             }
         }
 
