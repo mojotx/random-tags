@@ -11,6 +11,7 @@ usage( const char *s )
     fputc( '\n', stderr );
     fputs( "Arguments:\n", stderr );
     fputc( '\n', stderr );
+    fputs( "        -h        Print help (this info)\n", stderr);
     fputs( "        -d        Turn on debugging\n", stderr );
     fputs( "        -r        Randomize output\n", stderr );
     fputc( '\n', stderr );
