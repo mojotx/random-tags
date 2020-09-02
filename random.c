@@ -30,19 +30,3 @@ getBump(void)
     }
     return b;
 }
-
-
-bool
-bump( uint32_t qty )
-{
-    uint32_t limit = qty / 10;
-    if (limit == 0)
-        limit=1;
-    return ( arc4random_uniform( qty ) <= limit ? true : false );
-}
-
-bool
-yesorno( void )
-{
-    return (arc4random_uniform(2));
-}
