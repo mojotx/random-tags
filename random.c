@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #ifdef __linux__
 typedef unsigned char u_char;
 # include <bsd/stdlib.h>

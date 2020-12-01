@@ -1,9 +1,6 @@
 #ifndef MAJ_VERSION_STRUCT_H
 #define MAJ_VERSION_STRUCT_H
 
-#include <stdio.h>
-#include <string.h>
-
 typedef struct {
     unsigned major;
     unsigned minor;

@@ -12,8 +12,12 @@ LIBS+=-lbsd
 endif
 
 ifeq ($(OS), Darwin)
-CFLAGS+=-arch x86_64 -mmacosx-version-min=10.15
+CFLAGS+=-arch x86_64 -mmacosx-version-min=11.0
 endif
+
+.PHONY: rv clean test
+
+all: rv
 
 rv: $(O_FILES)
 	$(CC) $(CFLAGS) -o $@ $(O_FILES)

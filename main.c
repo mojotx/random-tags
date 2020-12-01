@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <string.h>
-#include <assert.h>
 #include <stdbool.h>
 #include <getopt.h>
 #include <ctype.h>
